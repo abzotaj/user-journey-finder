@@ -18,6 +18,22 @@ export function JourneyGraph({ journey, matchedStepIds, selectedStepId, onSelect
   const layout = useMemo(() => layoutJourney(journey), [journey])
   const [scale, setScale] = useState(1)
   const nodeRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const viewportRef = useRef<HTMLDivElement | null>(null)
+
+  const fit = () => {
+    const el = viewportRef.current
+    if (!el) return
+    const available = el.clientWidth - 32
+    setScale(Math.min(1, Math.max(0.5, Number((available / layout.width).toFixed(2)))))
+  }
+
+  // Fit the diagram to the viewport whenever a different journey is opened.
+  useEffect(() => {
+    const el = viewportRef.current
+    if (!el) return
+    const available = el.clientWidth - 32
+    setScale(Math.min(1, Math.max(0.5, Number((available / layout.width).toFixed(2)))))
+  }, [layout.width])
 
   useEffect(() => {
     if (!selectedStepId) return
@@ -56,12 +72,12 @@ export function JourneyGraph({ journey, matchedStepIds, selectedStepId, onSelect
         >
           <Plus className="size-3.5" aria-hidden="true" />
         </ZoomButton>
-        <ZoomButton label="Reset zoom" onClick={() => setScale(1)}>
+        <ZoomButton label="Fit to width" onClick={fit}>
           <RotateCcw className="size-3.5" aria-hidden="true" />
         </ZoomButton>
       </div>
 
-      <div className="flex flex-1 overflow-auto p-4">
+      <div ref={viewportRef} className="flex flex-1 overflow-auto p-4">
         <div
           className="relative m-auto"
           style={{ width: layout.width * scale, height: layout.height * scale }}

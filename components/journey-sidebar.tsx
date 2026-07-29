@@ -1,6 +1,6 @@
 "use client"
 
-import { Search, X } from "lucide-react"
+import { ChevronRight, Search, X } from "lucide-react"
 import { KIND_ICON } from "@/components/kind-visuals"
 import { KIND_META, allRepos, journeyRepos } from "@/lib/journeys"
 import type { SearchResult, StepKind } from "@/lib/journeys"
@@ -87,7 +87,11 @@ export function JourneySidebar({
         </div>
 
         <details className="group">
-          <summary className="cursor-pointer list-none text-[11px] uppercase tracking-wide text-muted-foreground transition hover:text-foreground">
+          <summary className="flex cursor-pointer list-none items-center gap-1 text-[11px] uppercase tracking-wide text-muted-foreground transition hover:text-foreground">
+            <ChevronRight
+              className="size-3 transition-transform group-open:rotate-90"
+              aria-hidden="true"
+            />
             Filter by repository {repos.length ? `(${repos.length})` : ""}
           </summary>
           <div className="mt-2 flex flex-wrap gap-1.5">
