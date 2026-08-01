@@ -1,4 +1,4 @@
-import { Boxes, Cloud, Database, MonitorSmartphone, Radio, Server } from "lucide-react"
+import { Boxes, Cloud, Cog, Database, MonitorSmartphone, Radio, Server } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { StepKind } from "@/lib/journeys"
 
@@ -9,10 +9,16 @@ export const KIND_ICON: Record<StepKind, LucideIcon> = {
   db: Database,
   queue: Radio,
   external: Cloud,
+  infra: Cog,
 }
 
 /** Ring / text treatment per step kind. Only two hues are used: flow (internal) and external. */
 export const KIND_STYLE: Record<StepKind, { chip: string; icon: string; ring: string }> = {
+  infra: {
+    chip: "bg-muted text-foreground border border-dashed border-foreground/30",
+    icon: "bg-muted text-foreground/70",
+    ring: "border-dashed border-foreground/40",
+  },
   page: {
     chip: "bg-flow text-flow-foreground",
     icon: "bg-flow text-flow-foreground",
