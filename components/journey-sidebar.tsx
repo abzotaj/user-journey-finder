@@ -2,16 +2,17 @@
 
 import { ChevronRight, Search, X } from "lucide-react"
 import { KIND_ICON } from "@/components/kind-visuals"
-import { KIND_META, allRepos, journeyRepos } from "@/lib/journeys"
+import { KIND_META, journeyRepos } from "@/lib/journeys"
 import type { SearchResult, StepKind } from "@/lib/journeys"
 import { cn } from "@/lib/utils"
 
-const KIND_ORDER: StepKind[] = ["page", "api", "service", "db", "queue", "external"]
+const KIND_ORDER: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"]
 
 type Props = {
   query: string
   onQueryChange: (value: string) => void
   repos: string[]
+  availableRepos: string[]
   kinds: StepKind[]
   onToggleRepo: (repo: string) => void
   onToggleKind: (kind: StepKind) => void
@@ -25,6 +26,7 @@ export function JourneySidebar({
   query,
   onQueryChange,
   repos,
+  availableRepos,
   kinds,
   onToggleRepo,
   onToggleKind,
@@ -95,7 +97,7 @@ export function JourneySidebar({
             Filter by repository {repos.length ? `(${repos.length})` : ""}
           </summary>
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {allRepos.map((repo) => {
+            {availableRepos.map((repo) => {
               const active = repos.includes(repo)
               return (
                 <button

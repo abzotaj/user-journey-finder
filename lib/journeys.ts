@@ -1,4 +1,13 @@
-export type StepKind = "page" | "api" | "service" | "db" | "queue" | "external"
+export type StepKind = "page" | "api" | "service" | "db" | "queue" | "external" | "infra"
+
+/** Present on steps/edges produced by a trizo-horus scan; absent on hand-authored sample data. */
+export type Confidence = "low" | "medium" | "high"
+
+export type SourceRef = {
+  file: string
+  startLine: number
+  endLine: number
+}
 
 export type Step = {
   id: string
@@ -16,6 +25,8 @@ export type Step = {
   /** Third-party vendor for external steps */
   vendor?: string
   notes?: string
+  sourceRef?: SourceRef
+  confidence?: Confidence
 }
 
 export type Edge = {
@@ -23,6 +34,7 @@ export type Edge = {
   to: string
   label: string
   transport: "http" | "grpc" | "event" | "sql" | "https" | "websocket"
+  confidence?: Confidence
 }
 
 export type Journey = {
@@ -43,6 +55,7 @@ export const KIND_META: Record<StepKind, { label: string; short: string }> = {
   db: { label: "Database write / read", short: "Database" },
   queue: { label: "Queue / event bus", short: "Queue" },
   external: { label: "Third-party API", short: "3rd party" },
+  infra: { label: "Infrastructure / provisioning", short: "Infra" },
 }
 
 export const TRANSPORT_LABEL: Record<Edge["transport"], string> = {
@@ -622,7 +635,12 @@ export const journeys: Journey[] = [
   },
 ]
 
-export const allRepos = Array.from(new Set(journeys.flatMap((j) => j.steps.map((s) => s.repo)))).sort()
+export const allRepos = allReposIn(journeys)
+
+/** Distinct, sorted repo names across an arbitrary set of journeys (e.g. a loaded scan, not just the sample data). */
+export function allReposIn(list: Journey[]) {
+  return Array.from(new Set(list.flatMap((j) => j.steps.map((s) => s.repo)))).sort()
+}
 
 /** Everything about a step that is searchable, lowercased. */
 export function stepHaystack(step: Step) {
@@ -645,13 +663,14 @@ export type SearchResult = {
 }
 
 export function searchJourneys(
+  list: Journey[],
   query: string,
   filters: { repos: string[]; kinds: StepKind[] },
 ): SearchResult[] {
   const q = query.trim().toLowerCase()
   const terms = q.split(/\s+/).filter(Boolean)
 
-  return journeys
+  return list
     .map<SearchResult | null>((journey) => {
       if (filters.repos.length && !journey.steps.some((s) => filters.repos.includes(s.repo))) return null
       if (filters.kinds.length && !journey.steps.some((s) => filters.kinds.includes(s.kind))) return null
@@ -670,11 +689,7 @@ export function searchJourneys(
       return { journey, matchedStepIds, score }
     })
     .filter((r): r is SearchResult => r !== null)
-    .sort(
-      (a, b) =>
-        b.score - a.score ||
-        journeys.indexOf(a.journey) - journeys.indexOf(b.journey),
-    )
+    .sort((a, b) => b.score - a.score || list.indexOf(a.journey) - list.indexOf(b.journey))
 }
 
 /* ---------------------------------- layout --------------------------------- */
@@ -757,7 +772,7 @@ export function layoutJourney(journey: Journey): Layout {
 
   const pos = new Map(nodes.map((n) => [n.id, n]))
 
-  const edges: LayoutEdge[] = journey.edges.flatMap((edge) => {
+  const edges: LayoutEdge[] = journey.edges.flatMap((edge): LayoutEdge[] => {
     const a = pos.get(edge.from)
     const b = pos.get(edge.to)
     if (!a || !b) return []

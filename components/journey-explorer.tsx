@@ -6,19 +6,33 @@ import { JourneyGraph } from "@/components/journey-graph"
 import { JourneySidebar } from "@/components/journey-sidebar"
 import { StepInspector } from "@/components/step-inspector"
 import { KIND_ICON, KIND_STYLE } from "@/components/kind-visuals"
-import { KIND_META, journeyRepos, searchJourneys } from "@/lib/journeys"
-import type { StepKind } from "@/lib/journeys"
+import { KIND_META, allReposIn, journeyRepos, searchJourneys } from "@/lib/journeys"
+import type { Journey, StepKind } from "@/lib/journeys"
 
-const LEGEND: StepKind[] = ["page", "api", "service", "db", "queue", "external"]
+const LEGEND: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"]
 
-export function JourneyExplorer() {
+type ScanMeta = {
+  generatedAt: string
+  scannerVersion: string
+  provider: string
+  reposScanned: string[]
+}
+
+type Props = {
+  journeys: Journey[]
+  /** Non-null when `journeys` came from a real trizo-horus scan rather than the bundled sample data. */
+  meta?: ScanMeta | null
+}
+
+export function JourneyExplorer({ journeys, meta }: Props) {
   const [query, setQuery] = useState("")
   const [repos, setRepos] = useState<string[]>([])
   const [kinds, setKinds] = useState<StepKind[]>([])
-  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>("registration")
+  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null)
   const [selectedStepId, setSelectedStepId] = useState<string | null>(null)
 
-  const results = useMemo(() => searchJourneys(query, { repos, kinds }), [query, repos, kinds])
+  const results = useMemo(() => searchJourneys(journeys, query, { repos, kinds }), [journeys, query, repos, kinds])
+  const availableRepos = useMemo(() => allReposIn(journeys), [journeys])
 
   const active = results.find((r) => r.journey.id === selectedJourneyId) ?? results[0] ?? null
   const journey = active?.journey ?? null
@@ -39,7 +53,9 @@ export function JourneyExplorer() {
           <div className="flex flex-col leading-tight">
             <h1 className="text-sm font-semibold">Journey Atlas</h1>
             <p className="text-[11px] text-muted-foreground">
-              Cross-repo user journeys and how data flows between them
+              {meta
+                ? `Scanned ${meta.reposScanned.length} repos · ${new Date(meta.generatedAt).toLocaleString()} · ${meta.provider}`
+                : "Cross-repo user journeys and how data flows between them"}
             </p>
           </div>
         </div>
@@ -65,6 +81,7 @@ export function JourneyExplorer() {
           query={query}
           onQueryChange={setQuery}
           repos={repos}
+          availableRepos={availableRepos}
           kinds={kinds}
           onToggleRepo={(repo) =>
             setRepos((prev) => (prev.includes(repo) ? prev.filter((r) => r !== repo) : [...prev, repo]))
