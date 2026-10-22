@@ -8,6 +8,32 @@ This repository is linked to a [v0](https://v0.app) project. You can continue de
 
 [Continue working on v0 →](https://v0.app/chat/projects/prj_YpcqxLZqOZxHhF7SZ8gCWQCLmcn9)
 
+## Input: trizo-horus scan output
+
+This app visualizes user journeys found by [trizo-horus](https://github.com/abzotaj/trizo-horus), which scans an entire codebase, including one split across multiple repositories, and writes its results as split-file JSON output (`index.json` plus per-journey files).
+
+Run trizo-horus against your codebase first, then point this app at its output directory. Copy `.env.example` to `.env` and set the path:
+
+```bash
+cp .env.example .env
+# edit .env
+TRIZO_HORUS_OUTPUT_DIR=/path/to/trizo-horus/output
+```
+
+Next.js loads `.env` automatically, so `npm run dev` picks the value up. You can also pass it inline for a one-off run:
+
+```bash
+TRIZO_HORUS_OUTPUT_DIR=/path/to/trizo-horus/output npm run dev
+```
+
+If `TRIZO_HORUS_OUTPUT_DIR` is not set, the app looks for `./scan-output` in the project root. When no scan output is found in either location, it falls back to the bundled sample data.
+
+### Environment variables
+
+| Variable                 | Required | Default         | Description                                                                         |
+| ------------------------ | -------- | --------------- | ----------------------------------------------------------------------------------- |
+| `TRIZO_HORUS_OUTPUT_DIR` | No       | `./scan-output` | Directory containing trizo-horus scan output (`index.json` plus per-journey files). |
+
 ## Getting Started
 
 First, run the development server:

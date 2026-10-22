@@ -1,46 +1,49 @@
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import { GitBranch, Workflow } from "lucide-react"
-import { JourneyGraph } from "@/components/journey-graph"
-import { JourneySidebar } from "@/components/journey-sidebar"
-import { StepInspector } from "@/components/step-inspector"
-import { KIND_ICON, KIND_STYLE } from "@/components/kind-visuals"
-import { KIND_META, allReposIn, journeyRepos, searchJourneys } from "@/lib/journeys"
-import type { Journey, StepKind } from "@/lib/journeys"
+import { useMemo, useState } from "react";
+import { GitBranch, Workflow } from "lucide-react";
+import { JourneyGraph } from "@/components/journey-graph";
+import { JourneySidebar } from "@/components/journey-sidebar";
+import { StepInspector } from "@/components/step-inspector";
+import { KIND_ICON, KIND_STYLE } from "@/components/kind-visuals";
+import { KIND_META, allReposIn, journeyRepos, searchJourneys } from "@/lib/journeys";
+import type { Journey, StepKind } from "@/lib/journeys";
 
-const LEGEND: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"]
+const LEGEND: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"];
 
 type ScanMeta = {
-  generatedAt: string
-  scannerVersion: string
-  provider: string
-  reposScanned: string[]
-}
+  generatedAt: string;
+  scannerVersion: string;
+  provider: string;
+  reposScanned: string[];
+};
 
 type Props = {
-  journeys: Journey[]
+  journeys: Journey[];
   /** Non-null when `journeys` came from a real trizo-horus scan rather than the bundled sample data. */
-  meta?: ScanMeta | null
-}
+  meta?: ScanMeta | null;
+};
 
 export function JourneyExplorer({ journeys, meta }: Props) {
-  const [query, setQuery] = useState("")
-  const [repos, setRepos] = useState<string[]>([])
-  const [kinds, setKinds] = useState<StepKind[]>([])
-  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null)
-  const [selectedStepId, setSelectedStepId] = useState<string | null>(null)
+  const [query, setQuery] = useState("");
+  const [repos, setRepos] = useState<string[]>([]);
+  const [kinds, setKinds] = useState<StepKind[]>([]);
+  const [selectedJourneyId, setSelectedJourneyId] = useState<string | null>(null);
+  const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 
-  const results = useMemo(() => searchJourneys(journeys, query, { repos, kinds }), [journeys, query, repos, kinds])
-  const availableRepos = useMemo(() => allReposIn(journeys), [journeys])
+  const results = useMemo(
+    () => searchJourneys(journeys, query, { repos, kinds }),
+    [journeys, query, repos, kinds],
+  );
+  const availableRepos = useMemo(() => allReposIn(journeys), [journeys]);
 
-  const active = results.find((r) => r.journey.id === selectedJourneyId) ?? results[0] ?? null
-  const journey = active?.journey ?? null
-  const selectedStep = journey?.steps.find((s) => s.id === selectedStepId) ?? null
+  const active = results.find((r) => r.journey.id === selectedJourneyId) ?? results[0] ?? null;
+  const journey = active?.journey ?? null;
+  const selectedStep = journey?.steps.find((s) => s.id === selectedStepId) ?? null;
 
   function selectJourney(id: string) {
-    setSelectedJourneyId(id)
-    setSelectedStepId(null)
+    setSelectedJourneyId(id);
+    setSelectedStepId(null);
   }
 
   return (
@@ -61,9 +64,12 @@ export function JourneyExplorer({ journeys, meta }: Props) {
         </div>
         <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
           {LEGEND.map((kind) => {
-            const Icon = KIND_ICON[kind]
+            const Icon = KIND_ICON[kind];
             return (
-              <li key={kind} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <li
+                key={kind}
+                className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+              >
                 <span
                   className={`flex size-4 items-center justify-center rounded ${KIND_STYLE[kind].icon}`}
                 >
@@ -71,7 +77,7 @@ export function JourneyExplorer({ journeys, meta }: Props) {
                 </span>
                 {KIND_META[kind].short}
               </li>
-            )
+            );
           })}
         </ul>
       </header>
@@ -84,14 +90,18 @@ export function JourneyExplorer({ journeys, meta }: Props) {
           availableRepos={availableRepos}
           kinds={kinds}
           onToggleRepo={(repo) =>
-            setRepos((prev) => (prev.includes(repo) ? prev.filter((r) => r !== repo) : [...prev, repo]))
+            setRepos((prev) =>
+              prev.includes(repo) ? prev.filter((r) => r !== repo) : [...prev, repo],
+            )
           }
           onToggleKind={(kind) =>
-            setKinds((prev) => (prev.includes(kind) ? prev.filter((k) => k !== kind) : [...prev, kind]))
+            setKinds((prev) =>
+              prev.includes(kind) ? prev.filter((k) => k !== kind) : [...prev, kind],
+            )
           }
           onClearFilters={() => {
-            setRepos([])
-            setKinds([])
+            setRepos([]);
+            setKinds([]);
           }}
           results={results}
           selectedJourneyId={journey?.id ?? null}
@@ -142,5 +152,5 @@ export function JourneyExplorer({ journeys, meta }: Props) {
         </section>
       </div>
     </main>
-  )
+  );
 }

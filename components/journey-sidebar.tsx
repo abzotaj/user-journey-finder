@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { ChevronRight, Search, X } from "lucide-react"
-import { KIND_ICON } from "@/components/kind-visuals"
-import { KIND_META, journeyRepos } from "@/lib/journeys"
-import type { SearchResult, StepKind } from "@/lib/journeys"
-import { cn } from "@/lib/utils"
+import { ChevronRight, Search, X } from "lucide-react";
+import { KIND_ICON } from "@/components/kind-visuals";
+import { KIND_META, journeyRepos } from "@/lib/journeys";
+import type { SearchResult, StepKind } from "@/lib/journeys";
+import { cn } from "@/lib/utils";
 
-const KIND_ORDER: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"]
+const KIND_ORDER: StepKind[] = ["page", "api", "service", "db", "queue", "external", "infra"];
 
 type Props = {
-  query: string
-  onQueryChange: (value: string) => void
-  repos: string[]
-  availableRepos: string[]
-  kinds: StepKind[]
-  onToggleRepo: (repo: string) => void
-  onToggleKind: (kind: StepKind) => void
-  onClearFilters: () => void
-  results: SearchResult[]
-  selectedJourneyId: string | null
-  onSelectJourney: (id: string) => void
-}
+  query: string;
+  onQueryChange: (value: string) => void;
+  repos: string[];
+  availableRepos: string[];
+  kinds: StepKind[];
+  onToggleRepo: (repo: string) => void;
+  onToggleKind: (kind: StepKind) => void;
+  onClearFilters: () => void;
+  results: SearchResult[];
+  selectedJourneyId: string | null;
+  onSelectJourney: (id: string) => void;
+};
 
 export function JourneySidebar({
   query,
@@ -35,7 +35,7 @@ export function JourneySidebar({
   selectedJourneyId,
   onSelectJourney,
 }: Props) {
-  const hasFilters = repos.length > 0 || kinds.length > 0
+  const hasFilters = repos.length > 0 || kinds.length > 0;
 
   return (
     <div className="flex w-full flex-col border-b border-border bg-card lg:w-96 lg:border-b-0 lg:border-r">
@@ -66,8 +66,8 @@ export function JourneySidebar({
 
         <div className="flex flex-wrap gap-1.5">
           {KIND_ORDER.map((kind) => {
-            const Icon = KIND_ICON[kind]
-            const active = kinds.includes(kind)
+            const Icon = KIND_ICON[kind];
+            const active = kinds.includes(kind);
             return (
               <button
                 key={kind}
@@ -84,7 +84,7 @@ export function JourneySidebar({
                 <Icon className="size-3" aria-hidden="true" />
                 {KIND_META[kind].short}
               </button>
-            )
+            );
           })}
         </div>
 
@@ -98,7 +98,7 @@ export function JourneySidebar({
           </summary>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {availableRepos.map((repo) => {
-              const active = repos.includes(repo)
+              const active = repos.includes(repo);
               return (
                 <button
                   key={repo}
@@ -114,7 +114,7 @@ export function JourneySidebar({
                 >
                   {repo}
                 </button>
-              )
+              );
             })}
           </div>
         </details>
@@ -137,7 +137,7 @@ export function JourneySidebar({
 
       <ul className="flex max-h-[42vh] flex-col gap-2 overflow-y-auto p-3 lg:max-h-none lg:flex-1">
         {results.map(({ journey, matchedStepIds }) => {
-          const selected = journey.id === selectedJourneyId
+          const selected = journey.id === selectedJourneyId;
           return (
             <li key={journey.id}>
               <button
@@ -184,15 +184,15 @@ export function JourneySidebar({
                 ) : null}
               </button>
             </li>
-          )
+          );
         })}
         {results.length === 0 ? (
           <li className="rounded-lg border border-dashed border-border p-6 text-center text-[13px] leading-relaxed text-muted-foreground">
-            No journeys match that query. Try a repo name, a file path fragment, an endpoint, a table
-            or a vendor.
+            No journeys match that query. Try a repo name, a file path fragment, an endpoint, a
+            table or a vendor.
           </li>
         ) : null}
       </ul>
     </div>
-  )
+  );
 }

@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { ArrowRight, CornerDownRight, Table2, X } from "lucide-react"
-import { KIND_ICON, KIND_STYLE } from "@/components/kind-visuals"
-import { KIND_META, TRANSPORT_LABEL } from "@/lib/journeys"
-import type { Journey, Step } from "@/lib/journeys"
-import { cn } from "@/lib/utils"
+import { ArrowRight, CornerDownRight, Table2, X } from "lucide-react";
+import { KIND_ICON, KIND_STYLE } from "@/components/kind-visuals";
+import { KIND_META, TRANSPORT_LABEL } from "@/lib/journeys";
+import type { Journey, Step } from "@/lib/journeys";
+import { cn } from "@/lib/utils";
 
 type Props = {
-  journey: Journey
-  step: Step
-  onClose: () => void
-  onSelectStep: (id: string) => void
-}
+  journey: Journey;
+  step: Step;
+  onClose: () => void;
+  onSelectStep: (id: string) => void;
+};
 
 export function StepInspector({ journey, step, onClose, onSelectStep }: Props) {
-  const Icon = KIND_ICON[step.kind]
-  const style = KIND_STYLE[step.kind]
-  const byId = new Map(journey.steps.map((s) => [s.id, s]))
-  const incoming = journey.edges.filter((e) => e.to === step.id)
-  const outgoing = journey.edges.filter((e) => e.from === step.id)
+  const Icon = KIND_ICON[step.kind];
+  const style = KIND_STYLE[step.kind];
+  const byId = new Map(journey.steps.map((s) => [s.id, s]));
+  const incoming = journey.edges.filter((e) => e.to === step.id);
+  const outgoing = journey.edges.filter((e) => e.from === step.id);
 
   return (
     <aside className="flex max-h-[60vh] w-full shrink-0 flex-col gap-4 overflow-y-auto border-t border-border bg-card p-5 lg:max-h-none lg:w-80 lg:border-l lg:border-t-0">
@@ -60,7 +60,9 @@ export function StepInspector({ journey, step, onClose, onSelectStep }: Props) {
 
       {step.tables?.length ? (
         <div className="flex flex-col gap-2">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Objects touched</p>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            Objects touched
+          </p>
           <ul className="flex flex-wrap gap-1.5">
             {step.tables.map((table) => (
               <li
@@ -76,7 +78,9 @@ export function StepInspector({ journey, step, onClose, onSelectStep }: Props) {
       ) : null}
 
       {step.notes ? (
-        <p className="text-pretty text-[13px] leading-relaxed text-muted-foreground">{step.notes}</p>
+        <p className="text-pretty text-[13px] leading-relaxed text-muted-foreground">
+          {step.notes}
+        </p>
       ) : null}
 
       {incoming.length ? (
@@ -107,7 +111,7 @@ export function StepInspector({ journey, step, onClose, onSelectStep }: Props) {
         />
       ) : null}
     </aside>
-  )
+  );
 }
 
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
@@ -116,7 +120,7 @@ function Field({ label, value, mono }: { label: string; value: string; mono?: bo
       <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</dt>
       <dd className={cn("text-foreground", mono && "break-all font-mono text-[11px]")}>{value}</dd>
     </div>
-  )
+  );
 }
 
 function NeighborList({
@@ -125,10 +129,10 @@ function NeighborList({
   onSelectStep,
   icon: Icon,
 }: {
-  title: string
-  items: Array<{ id: string; label: string; repo: string; detail: string }>
-  onSelectStep: (id: string) => void
-  icon: typeof ArrowRight
+  title: string;
+  items: Array<{ id: string; label: string; repo: string; detail: string }>;
+  onSelectStep: (id: string) => void;
+  icon: typeof ArrowRight;
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -153,5 +157,5 @@ function NeighborList({
         ))}
       </ul>
     </div>
-  )
+  );
 }

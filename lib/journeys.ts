@@ -1,52 +1,52 @@
-export type StepKind = "page" | "api" | "service" | "db" | "queue" | "external" | "infra"
+export type StepKind = "page" | "api" | "service" | "db" | "queue" | "external" | "infra";
 
 /** Present on steps/edges produced by a trizo-horus scan; absent on hand-authored sample data. */
-export type Confidence = "low" | "medium" | "high"
+export type Confidence = "low" | "medium" | "high";
 
 export type SourceRef = {
-  file: string
-  startLine: number
-  endLine: number
-}
+  file: string;
+  startLine: number;
+  endLine: number;
+};
 
 export type Step = {
-  id: string
-  repo: string
-  kind: StepKind
-  label: string
-  file: string
+  id: string;
+  repo: string;
+  kind: StepKind;
+  label: string;
+  file: string;
   /** Framework / runtime hint, e.g. "React route", "Express handler" */
-  tech?: string
+  tech?: string;
   /** HTTP route or RPC method exposed by this step */
-  endpoint?: string
+  endpoint?: string;
   /** Database + table for db steps */
-  datastore?: string
-  tables?: string[]
+  datastore?: string;
+  tables?: string[];
   /** Third-party vendor for external steps */
-  vendor?: string
-  notes?: string
-  sourceRef?: SourceRef
-  confidence?: Confidence
-}
+  vendor?: string;
+  notes?: string;
+  sourceRef?: SourceRef;
+  confidence?: Confidence;
+};
 
 export type Edge = {
-  from: string
-  to: string
-  label: string
-  transport: "http" | "grpc" | "event" | "sql" | "https" | "websocket"
-  confidence?: Confidence
-}
+  from: string;
+  to: string;
+  label: string;
+  transport: "http" | "grpc" | "event" | "sql" | "https" | "websocket";
+  confidence?: Confidence;
+};
 
 export type Journey = {
-  id: string
-  name: string
-  domain: string
-  description: string
-  entry: string
-  tags: string[]
-  steps: Step[]
-  edges: Edge[]
-}
+  id: string;
+  name: string;
+  domain: string;
+  description: string;
+  entry: string;
+  tags: string[];
+  steps: Step[];
+  edges: Edge[];
+};
 
 export const KIND_META: Record<StepKind, { label: string; short: string }> = {
   page: { label: "Client page / route", short: "Client" },
@@ -56,7 +56,7 @@ export const KIND_META: Record<StepKind, { label: string; short: string }> = {
   queue: { label: "Queue / event bus", short: "Queue" },
   external: { label: "Third-party API", short: "3rd party" },
   infra: { label: "Infrastructure / provisioning", short: "Infra" },
-}
+};
 
 export const TRANSPORT_LABEL: Record<Edge["transport"], string> = {
   http: "HTTP",
@@ -65,7 +65,7 @@ export const TRANSPORT_LABEL: Record<Edge["transport"], string> = {
   event: "Event",
   sql: "SQL",
   websocket: "WS",
-}
+};
 
 export const journeys: Journey[] = [
   {
@@ -85,7 +85,8 @@ export const journeys: Journey[] = [
         file: "app/(auth)/register/page.tsx",
         tech: "React page · Next.js App Router",
         endpoint: "/register",
-        notes: "Client component submits to the gateway via `useRegisterMutation` in lib/api/auth.ts.",
+        notes:
+          "Client component submits to the gateway via `useRegisterMutation` in lib/api/auth.ts.",
       },
       {
         id: "reg-api",
@@ -95,7 +96,8 @@ export const journeys: Journey[] = [
         file: "src/routes/auth/register.controller.ts",
         tech: "NestJS controller",
         endpoint: "POST /v1/auth/register",
-        notes: "Validates the DTO with zod, rate limits by IP, then forwards to identity over gRPC.",
+        notes:
+          "Validates the DTO with zod, rate limits by IP, then forwards to identity over gRPC.",
       },
       {
         id: "reg-identity",
@@ -105,7 +107,8 @@ export const journeys: Journey[] = [
         file: "internal/handler/create_user.go",
         tech: "Go gRPC service",
         endpoint: "identity.v1.Identity/CreateUser",
-        notes: "Hashes the password with argon2id and opens a transaction before publishing user.created.",
+        notes:
+          "Hashes the password with argon2id and opens a transaction before publishing user.created.",
       },
       {
         id: "reg-db",
@@ -189,7 +192,8 @@ export const journeys: Journey[] = [
         file: "app/checkout/page.tsx",
         tech: "React page · Next.js App Router",
         endpoint: "/checkout",
-        notes: "Server component loads the cart; the pay button posts from components/checkout/pay-button.tsx.",
+        notes:
+          "Server component loads the cart; the pay button posts from components/checkout/pay-button.tsx.",
       },
       {
         id: "co-mobile",
@@ -208,7 +212,8 @@ export const journeys: Journey[] = [
         file: "src/routes/orders/create-order.controller.ts",
         tech: "NestJS controller",
         endpoint: "POST /v1/orders",
-        notes: "Attaches an idempotency key derived from the cart id before calling the order service.",
+        notes:
+          "Attaches an idempotency key derived from the cart id before calling the order service.",
       },
       {
         id: "co-order",
@@ -633,181 +638,202 @@ export const journeys: Journey[] = [
       { from: "sr-bus", to: "sr-analytics", label: "consume", transport: "event" },
     ],
   },
-]
+];
 
-export const allRepos = allReposIn(journeys)
+export const allRepos = allReposIn(journeys);
 
 /** Distinct, sorted repo names across an arbitrary set of journeys (e.g. a loaded scan, not just the sample data). */
 export function allReposIn(list: Journey[]) {
-  return Array.from(new Set(list.flatMap((j) => j.steps.map((s) => s.repo)))).sort()
+  return Array.from(new Set(list.flatMap((j) => j.steps.map((s) => s.repo)))).sort();
 }
 
 /** Everything about a step that is searchable, lowercased. */
 export function stepHaystack(step: Step) {
-  return [step.repo, step.label, step.file, step.tech, step.endpoint, step.datastore, step.vendor, step.notes, ...(step.tables ?? [])]
+  return [
+    step.repo,
+    step.label,
+    step.file,
+    step.tech,
+    step.endpoint,
+    step.datastore,
+    step.vendor,
+    step.notes,
+    ...(step.tables ?? []),
+  ]
     .filter(Boolean)
     .join(" ")
-    .toLowerCase()
+    .toLowerCase();
 }
 
 export function journeyHaystack(journey: Journey) {
-  return [journey.name, journey.domain, journey.description, ...journey.tags, ...journey.steps.map(stepHaystack), ...journey.edges.map((e) => e.label)]
+  return [
+    journey.name,
+    journey.domain,
+    journey.description,
+    ...journey.tags,
+    ...journey.steps.map(stepHaystack),
+    ...journey.edges.map((e) => e.label),
+  ]
     .join(" ")
-    .toLowerCase()
+    .toLowerCase();
 }
 
 export type SearchResult = {
-  journey: Journey
-  matchedStepIds: string[]
-  score: number
-}
+  journey: Journey;
+  matchedStepIds: string[];
+  score: number;
+};
 
 export function searchJourneys(
   list: Journey[],
   query: string,
   filters: { repos: string[]; kinds: StepKind[] },
 ): SearchResult[] {
-  const q = query.trim().toLowerCase()
-  const terms = q.split(/\s+/).filter(Boolean)
+  const q = query.trim().toLowerCase();
+  const terms = q.split(/\s+/).filter(Boolean);
 
   return list
     .map<SearchResult | null>((journey) => {
-      if (filters.repos.length && !journey.steps.some((s) => filters.repos.includes(s.repo))) return null
-      if (filters.kinds.length && !journey.steps.some((s) => filters.kinds.includes(s.kind))) return null
+      if (filters.repos.length && !journey.steps.some((s) => filters.repos.includes(s.repo)))
+        return null;
+      if (filters.kinds.length && !journey.steps.some((s) => filters.kinds.includes(s.kind)))
+        return null;
 
-      const hay = journeyHaystack(journey)
-      if (terms.length && !terms.every((t) => hay.includes(t))) return null
+      const hay = journeyHaystack(journey);
+      if (terms.length && !terms.every((t) => hay.includes(t))) return null;
 
       const matchedStepIds = terms.length
-        ? journey.steps.filter((s) => terms.some((t) => stepHaystack(s).includes(t))).map((s) => s.id)
-        : []
+        ? journey.steps
+            .filter((s) => terms.some((t) => stepHaystack(s).includes(t)))
+            .map((s) => s.id)
+        : [];
 
-      let score = matchedStepIds.length
-      if (terms.length && terms.every((t) => journey.name.toLowerCase().includes(t))) score += 10
-      if (terms.length && journey.tags.some((tag) => terms.includes(tag.toLowerCase()))) score += 4
+      let score = matchedStepIds.length;
+      if (terms.length && terms.every((t) => journey.name.toLowerCase().includes(t))) score += 10;
+      if (terms.length && journey.tags.some((tag) => terms.includes(tag.toLowerCase()))) score += 4;
 
-      return { journey, matchedStepIds, score }
+      return { journey, matchedStepIds, score };
     })
     .filter((r): r is SearchResult => r !== null)
-    .sort((a, b) => b.score - a.score || list.indexOf(a.journey) - list.indexOf(b.journey))
+    .sort((a, b) => b.score - a.score || list.indexOf(a.journey) - list.indexOf(b.journey));
 }
 
 /* ---------------------------------- layout --------------------------------- */
 
-export const NODE_W = 232
-export const NODE_H = 92
-const COL_GAP = 208
-const ROW_GAP = 32
-const PAD_X = 28
-const PAD_Y = 28
+export const NODE_W = 232;
+export const NODE_H = 92;
+const COL_GAP = 208;
+const ROW_GAP = 32;
+const PAD_X = 28;
+const PAD_Y = 28;
 
-export type PositionedNode = Step & { x: number; y: number; layer: number }
-export type LayoutEdge = Edge & { path: string; midX: number; midY: number; backward: boolean }
+export type PositionedNode = Step & { x: number; y: number; layer: number };
+export type LayoutEdge = Edge & { path: string; midX: number; midY: number; backward: boolean };
 export type Layout = {
-  nodes: PositionedNode[]
-  edges: LayoutEdge[]
-  width: number
-  height: number
-}
+  nodes: PositionedNode[];
+  edges: LayoutEdge[];
+  width: number;
+  height: number;
+};
 
 /** Longest-path layering over the journey DAG (cycle safe). */
 function computeLayers(journey: Journey) {
-  const layer = new Map<string, number>()
-  journey.steps.forEach((s) => layer.set(s.id, 0))
+  const layer = new Map<string, number>();
+  journey.steps.forEach((s) => layer.set(s.id, 0));
 
-  const outgoing = new Map<string, Edge[]>()
+  const outgoing = new Map<string, Edge[]>();
   journey.edges.forEach((e) => {
-    outgoing.set(e.from, [...(outgoing.get(e.from) ?? []), e])
-  })
+    outgoing.set(e.from, [...(outgoing.get(e.from) ?? []), e]);
+  });
 
   const roots = journey.steps
     .filter((s) => !journey.edges.some((e) => e.to === s.id) || s.id === journey.entry)
-    .map((s) => s.id)
+    .map((s) => s.id);
 
   const queue: Array<{ id: string; depth: number; seen: Set<string> }> = roots.map((id) => ({
     id,
     depth: 0,
     seen: new Set([id]),
-  }))
+  }));
 
   while (queue.length) {
-    const { id, depth, seen } = queue.shift()!
-    layer.set(id, Math.max(layer.get(id) ?? 0, depth))
+    const { id, depth, seen } = queue.shift()!;
+    layer.set(id, Math.max(layer.get(id) ?? 0, depth));
     for (const edge of outgoing.get(id) ?? []) {
-      if (seen.has(edge.to)) continue
-      queue.push({ id: edge.to, depth: depth + 1, seen: new Set([...seen, edge.to]) })
+      if (seen.has(edge.to)) continue;
+      queue.push({ id: edge.to, depth: depth + 1, seen: new Set([...seen, edge.to]) });
     }
   }
 
-  return layer
+  return layer;
 }
 
 export function layoutJourney(journey: Journey): Layout {
-  const layerOf = computeLayers(journey)
+  const layerOf = computeLayers(journey);
 
-  const byLayer = new Map<number, Step[]>()
+  const byLayer = new Map<number, Step[]>();
   journey.steps.forEach((step) => {
-    const l = layerOf.get(step.id) ?? 0
-    byLayer.set(l, [...(byLayer.get(l) ?? []), step])
-  })
+    const l = layerOf.get(step.id) ?? 0;
+    byLayer.set(l, [...(byLayer.get(l) ?? []), step]);
+  });
 
-  const layers = Array.from(byLayer.keys()).sort((a, b) => a - b)
-  const tallest = Math.max(...layers.map((l) => byLayer.get(l)!.length))
-  const contentH = tallest * NODE_H + (tallest - 1) * ROW_GAP
+  const layers = Array.from(byLayer.keys()).sort((a, b) => a - b);
+  const tallest = Math.max(...layers.map((l) => byLayer.get(l)!.length));
+  const contentH = tallest * NODE_H + (tallest - 1) * ROW_GAP;
 
-  const nodes: PositionedNode[] = []
+  const nodes: PositionedNode[] = [];
   layers.forEach((l) => {
-    const column = byLayer.get(l)!
-    const colH = column.length * NODE_H + (column.length - 1) * ROW_GAP
-    const offsetY = PAD_Y + (contentH - colH) / 2
+    const column = byLayer.get(l)!;
+    const colH = column.length * NODE_H + (column.length - 1) * ROW_GAP;
+    const offsetY = PAD_Y + (contentH - colH) / 2;
     column.forEach((step, i) => {
       nodes.push({
         ...step,
         layer: l,
         x: PAD_X + l * (NODE_W + COL_GAP),
         y: offsetY + i * (NODE_H + ROW_GAP),
-      })
-    })
-  })
+      });
+    });
+  });
 
-  const pos = new Map(nodes.map((n) => [n.id, n]))
+  const pos = new Map(nodes.map((n) => [n.id, n]));
 
   const edges: LayoutEdge[] = journey.edges.flatMap((edge): LayoutEdge[] => {
-    const a = pos.get(edge.from)
-    const b = pos.get(edge.to)
-    if (!a || !b) return []
+    const a = pos.get(edge.from);
+    const b = pos.get(edge.to);
+    if (!a || !b) return [];
 
-    const backward = b.x <= a.x
-    const x1 = backward ? a.x : a.x + NODE_W
-    const y1 = a.y + NODE_H / 2
-    const x2 = backward ? b.x + NODE_W : b.x
-    const y2 = b.y + NODE_H / 2
+    const backward = b.x <= a.x;
+    const x1 = backward ? a.x : a.x + NODE_W;
+    const y1 = a.y + NODE_H / 2;
+    const x2 = backward ? b.x + NODE_W : b.x;
+    const y2 = b.y + NODE_H / 2;
 
-    let path: string
+    let path: string;
     if (backward) {
-      const dip = Math.max(a.y, b.y) + NODE_H + 26
-      path = `M ${x1} ${y1} C ${x1 - 60} ${y1}, ${x1 - 60} ${dip}, ${(x1 + x2) / 2} ${dip} C ${x2 + 60} ${dip}, ${x2 + 60} ${y2}, ${x2} ${y2}`
-      return [{ ...edge, path, midX: (x1 + x2) / 2, midY: dip, backward }]
+      const dip = Math.max(a.y, b.y) + NODE_H + 26;
+      path = `M ${x1} ${y1} C ${x1 - 60} ${y1}, ${x1 - 60} ${dip}, ${(x1 + x2) / 2} ${dip} C ${x2 + 60} ${dip}, ${x2 + 60} ${y2}, ${x2} ${y2}`;
+      return [{ ...edge, path, midX: (x1 + x2) / 2, midY: dip, backward }];
     }
 
-    const dx = Math.max(40, (x2 - x1) / 2)
-    path = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`
+    const dx = Math.max(40, (x2 - x1) / 2);
+    path = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
 
     // Keep the label inside the first column gap so it never sits on top of a node.
-    const spansLayers = b.layer - a.layer > 1
-    const midX = spansLayers ? x1 + COL_GAP / 2 : (x1 + x2) / 2
-    const t = x2 === x1 ? 0.5 : (midX - x1) / (x2 - x1)
-    const midY = y1 + (y2 - y1) * t
+    const spansLayers = b.layer - a.layer > 1;
+    const midX = spansLayers ? x1 + COL_GAP / 2 : (x1 + x2) / 2;
+    const t = x2 === x1 ? 0.5 : (midX - x1) / (x2 - x1);
+    const midY = y1 + (y2 - y1) * t;
 
-    return [{ ...edge, path, midX, midY, backward }]
-  })
+    return [{ ...edge, path, midX, midY, backward }];
+  });
 
-  const width = PAD_X * 2 + layers.length * NODE_W + (layers.length - 1) * COL_GAP
-  const height = PAD_Y * 2 + contentH + 80
+  const width = PAD_X * 2 + layers.length * NODE_W + (layers.length - 1) * COL_GAP;
+  const height = PAD_Y * 2 + contentH + 80;
 
-  return { nodes, edges, width, height }
+  return { nodes, edges, width, height };
 }
 
 export function journeyRepos(journey: Journey) {
-  return Array.from(new Set(journey.steps.map((s) => s.repo)))
+  return Array.from(new Set(journey.steps.map((s) => s.repo)));
 }
